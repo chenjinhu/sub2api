@@ -514,7 +514,7 @@
             <label class="input-label mb-0">{{ t("admin.groups.systemPrompt.title") }}</label>
             <Toggle v-model="createForm.system_prompt_enabled" />
           </div>
-          <textarea v-model="createForm.system_prompt" rows="6" maxlength="16384" class="input font-mono"
+          <textarea v-model="createForm.system_prompt" rows="6" class="input font-mono"
             :required="createForm.system_prompt_enabled"
             :placeholder="t('admin.groups.systemPrompt.placeholder')"
             data-test="create-group-system-prompt"></textarea>
@@ -2166,7 +2166,7 @@
             <label class="input-label mb-0">{{ t("admin.groups.systemPrompt.title") }}</label>
             <Toggle v-model="editForm.system_prompt_enabled" />
           </div>
-          <textarea v-model="editForm.system_prompt" rows="6" maxlength="16384" class="input font-mono"
+          <textarea v-model="editForm.system_prompt" rows="6" class="input font-mono"
             :required="editForm.system_prompt_enabled"
             :placeholder="t('admin.groups.systemPrompt.placeholder')"
             data-test="edit-group-system-prompt"></textarea>

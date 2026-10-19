@@ -186,7 +186,7 @@ func sanitizeUpdateGroupRequestForSimpleMode(req *UpdateGroupRequest) {
 // CreateGroupRequest represents create group request
 type CreateGroupRequest struct {
 	SystemPromptEnabled       bool                          `json:"system_prompt_enabled"`
-	SystemPrompt              string                        `json:"system_prompt" binding:"omitempty,max=16384"`
+	SystemPrompt              string                        `json:"system_prompt"`
 	Name                      string                        `json:"name" binding:"required"`
 	Description               string                        `json:"description"`
 	I18n                      service.GroupI18n             `json:"i18n"` // 名称与描述的界面语言译文
@@ -263,7 +263,7 @@ type CreateGroupRequest struct {
 // UpdateGroupRequest represents update group request
 type UpdateGroupRequest struct {
 	SystemPromptEnabled       *bool                          `json:"system_prompt_enabled"`
-	SystemPrompt              *string                        `json:"system_prompt" binding:"omitempty,max=16384"`
+	SystemPrompt              *string                        `json:"system_prompt"`
 	Name                      string                         `json:"name"`
 	Description               *string                        `json:"description"`
 	I18n                      *service.GroupI18n             `json:"i18n"` // 缺省不修改，传入则整体替换

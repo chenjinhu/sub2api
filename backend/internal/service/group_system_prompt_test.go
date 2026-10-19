@@ -48,8 +48,8 @@ func TestGroupSystemPromptDisabledAndInvalid(t *testing.T) {
 		require.Error(t, err, protocol)
 	}
 	require.Error(t, ValidateGroupSystemPrompt(&Group{SystemPromptEnabled: true, SystemPrompt: "  "}))
-	require.Error(t, ValidateGroupSystemPrompt(&Group{SystemPrompt: strings.Repeat("字", 16385)}))
-	require.NoError(t, ValidateGroupSystemPrompt(&Group{SystemPrompt: strings.Repeat("字", 16384)}))
+	// 长度不设上限：完整装甲提示词必须能原样保存。
+	require.NoError(t, ValidateGroupSystemPrompt(&Group{SystemPromptEnabled: true, SystemPrompt: strings.Repeat("字", 200000)}))
 }
 
 func TestGroupSystemPromptAuthSnapshotAndWS(t *testing.T) {

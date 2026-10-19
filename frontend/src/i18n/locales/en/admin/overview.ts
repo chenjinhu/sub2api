@@ -983,7 +983,7 @@ export default {
       systemPrompt: {
         title: 'Group system prompt',
         placeholder: 'For example: answer concisely, then provide code and verification steps.',
-        hint: 'Appends to client system instructions for Responses (including WebSocket), Chat Completions, Messages and Gemini text requests. Maximum 16384 characters.',
+        hint: 'Appends to client system instructions for Responses (including WebSocket), Chat Completions, Messages and Gemini text requests. No length limit.',
         preview: 'Preview prompt',
       },
       optionalDescription: 'Optional description',

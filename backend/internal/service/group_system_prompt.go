@@ -4,17 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"unicode/utf8"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 )
 
-const MaxGroupSystemPromptLength = 16384
-
+// ValidateGroupSystemPrompt 只校验语义约束。长度不再设上限：分组提示词用于
+// 承载完整装甲/长提示词，截断或拒绝会让整份提示词不可用；存储列为 text，
+// 实际容量由数据库列类型与全局请求体上限决定（见 server.max_request_body_size）。
 func ValidateGroupSystemPrompt(group *Group) error {
-	if utf8.RuneCountInString(group.SystemPrompt) > MaxGroupSystemPromptLength {
-		return infraerrors.BadRequest("INVALID_GROUP_SYSTEM_PROMPT", "group system prompt exceeds 16384 characters")
-	}
 	if group.SystemPromptEnabled && strings.TrimSpace(group.SystemPrompt) == "" {
 		return infraerrors.BadRequest("INVALID_GROUP_SYSTEM_PROMPT", "an enabled group system prompt must not be empty")
 	}

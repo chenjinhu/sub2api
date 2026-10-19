@@ -1017,7 +1017,7 @@ export default {
       systemPrompt: {
         title: '分组专属提示词',
         placeholder: '例如：使用中文回答，先给结论，再给代码和验证步骤。',
-        hint: '启用后追加到分组文本请求的系统指令，保留客户端已有内容。支持 Responses（含 WebSocket）、Chat Completions、Messages 和 Gemini 文本接口。最多 16384 字符。',
+        hint: '启用后追加到分组文本请求的系统指令，保留客户端已有内容。支持 Responses（含 WebSocket）、Chat Completions、Messages 和 Gemini 文本接口。长度不设上限。',
         preview: '预览提示词',
       },
       optionalDescription: '可选描述',
