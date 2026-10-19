@@ -40,6 +40,14 @@ func (Group) Fields() []ent.Field {
 		field.String("name").
 			MaxLen(100).
 			NotEmpty(),
+		// 分组专属系统提示词（added by migration 246）
+		field.Bool("system_prompt_enabled").
+			Default(false).
+			Comment("是否启用分组专属系统提示词"),
+		field.String("system_prompt").
+			Default("").
+			SchemaType(map[string]string{dialect.Postgres: "text"}).
+			Comment("追加到客户端系统指令之后的分组提示词"),
 		field.String("description").
 			Optional().
 			Nillable().

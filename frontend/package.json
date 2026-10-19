@@ -68,5 +68,6 @@
       "dompurify@<3.4.14": ">=3.4.14",
       "source-map-js@<1.2.2": ">=1.2.2"
     }
-  }
+  },
+  "packageManager": "pnpm@9.15.9"
 }

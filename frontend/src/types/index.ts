@@ -639,6 +639,8 @@ export interface Group {
 export interface AdminGroup extends Group {
   // 管理端的 name / description 始终是原字段，各语言译文另放在 i18n 里
   i18n?: GroupI18n
+  system_prompt_enabled?: boolean
+  system_prompt?: string
   force_openai_fast: boolean
   free_openai_fast: boolean
   model_pricing: import('@/api/admin/channels').ChannelModelPricing[]
@@ -803,6 +805,8 @@ export interface UpdateApiKeyRequest {
 }
 
 export interface CreateGroupRequest {
+  system_prompt_enabled?: boolean
+  system_prompt?: string
   name: string
   description?: string | null
   i18n?: GroupI18n
@@ -869,6 +873,8 @@ export interface CreateGroupRequest {
 }
 
 export interface UpdateGroupRequest {
+  system_prompt_enabled?: boolean
+  system_prompt?: string
   name?: string
   description?: string | null
   i18n?: GroupI18n

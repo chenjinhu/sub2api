@@ -2966,6 +2966,7 @@ func (h *OpenAIGatewayHandler) ResponsesWebSocket(c *gin.Context) {
 			return
 		}
 		hooks := &service.OpenAIWSIngressHooks{
+			SystemPromptGroup:           apiKey.Group,
 			ClientLifecycleContext:      clientLifecycleCtx,
 			InitialRequestModel:         reqModel,
 			InitialTurnStartedAt:        firstTurnStartedAt,

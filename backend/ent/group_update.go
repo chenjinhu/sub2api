@@ -77,6 +77,34 @@ func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
 	return _u
 }
 
+// SetSystemPromptEnabled sets the "system_prompt_enabled" field.
+func (_u *GroupUpdate) SetSystemPromptEnabled(v bool) *GroupUpdate {
+	_u.mutation.SetSystemPromptEnabled(v)
+	return _u
+}
+
+// SetNillableSystemPromptEnabled sets the "system_prompt_enabled" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableSystemPromptEnabled(v *bool) *GroupUpdate {
+	if v != nil {
+		_u.SetSystemPromptEnabled(*v)
+	}
+	return _u
+}
+
+// SetSystemPrompt sets the "system_prompt" field.
+func (_u *GroupUpdate) SetSystemPrompt(v string) *GroupUpdate {
+	_u.mutation.SetSystemPrompt(v)
+	return _u
+}
+
+// SetNillableSystemPrompt sets the "system_prompt" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableSystemPrompt(v *string) *GroupUpdate {
+	if v != nil {
+		_u.SetSystemPrompt(*v)
+	}
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *GroupUpdate) SetDescription(v string) *GroupUpdate {
 	_u.mutation.SetDescription(v)
@@ -1581,6 +1609,12 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(group.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.SystemPromptEnabled(); ok {
+		_spec.SetField(group.FieldSystemPromptEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SystemPrompt(); ok {
+		_spec.SetField(group.FieldSystemPrompt, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(group.FieldDescription, field.TypeString, value)
 	}
@@ -2276,6 +2310,34 @@ func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
 func (_u *GroupUpdateOne) SetNillableName(v *string) *GroupUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetSystemPromptEnabled sets the "system_prompt_enabled" field.
+func (_u *GroupUpdateOne) SetSystemPromptEnabled(v bool) *GroupUpdateOne {
+	_u.mutation.SetSystemPromptEnabled(v)
+	return _u
+}
+
+// SetNillableSystemPromptEnabled sets the "system_prompt_enabled" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableSystemPromptEnabled(v *bool) *GroupUpdateOne {
+	if v != nil {
+		_u.SetSystemPromptEnabled(*v)
+	}
+	return _u
+}
+
+// SetSystemPrompt sets the "system_prompt" field.
+func (_u *GroupUpdateOne) SetSystemPrompt(v string) *GroupUpdateOne {
+	_u.mutation.SetSystemPrompt(v)
+	return _u
+}
+
+// SetNillableSystemPrompt sets the "system_prompt" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableSystemPrompt(v *string) *GroupUpdateOne {
+	if v != nil {
+		_u.SetSystemPrompt(*v)
 	}
 	return _u
 }
@@ -3813,6 +3875,12 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(group.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SystemPromptEnabled(); ok {
+		_spec.SetField(group.FieldSystemPromptEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SystemPrompt(); ok {
+		_spec.SetField(group.FieldSystemPrompt, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(group.FieldDescription, field.TypeString, value)

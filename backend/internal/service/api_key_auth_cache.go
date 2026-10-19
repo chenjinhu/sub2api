@@ -103,6 +103,8 @@ type APIKeyAuthGroupSnapshot struct {
 	// OpenAI Messages 调度配置（仅 openai 平台使用）
 	AllowMessagesDispatch       bool                              `json:"allow_messages_dispatch"`
 	AllowLive                   bool                              `json:"allow_live"`
+	SystemPromptEnabled         bool                              `json:"system_prompt_enabled"`
+	SystemPrompt                string                            `json:"system_prompt"`
 	ForceOpenAIFast             bool                              `json:"force_openai_fast"`
 	FreeOpenAIFast              bool                              `json:"free_openai_fast"`
 	DefaultMappedModel          string                            `json:"default_mapped_model,omitempty"`

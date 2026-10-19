@@ -570,6 +570,8 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 		Name:                            input.Name,
 		Description:                     input.Description,
 		I18n:                            i18n,
+		SystemPromptEnabled:             input.SystemPromptEnabled,
+		SystemPrompt:                    strings.TrimSpace(input.SystemPrompt),
 		Platform:                        platform,
 		RateMultiplier:                  input.RateMultiplier,
 		IsExclusive:                     input.IsExclusive,
@@ -636,6 +638,9 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 		group.AllowLive = false
 	}
 	sanitizeGroupReasoningEffortPolicy(group)
+	if err := ValidateGroupSystemPrompt(group); err != nil {
+		return nil, err
+	}
 	if err := s.groupRepo.Create(ctx, group); err != nil {
 		return nil, err
 	}
@@ -777,6 +782,15 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 
 	if input.Name != "" {
 		group.Name = input.Name
+	}
+	if input.SystemPrompt != nil {
+		group.SystemPrompt = strings.TrimSpace(*input.SystemPrompt)
+	}
+	if input.SystemPromptEnabled != nil {
+		group.SystemPromptEnabled = *input.SystemPromptEnabled
+	}
+	if err := ValidateGroupSystemPrompt(group); err != nil {
+		return nil, err
 	}
 	if input.Description != nil {
 		group.Description = *input.Description

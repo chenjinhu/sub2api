@@ -7,12 +7,14 @@ import type { AdminGroup, CodexModelsManifestConfig } from "@/types";
 import GroupsView from "@/views/admin/GroupsView.vue";
 
 const {
+  updateGroup,
   listGroups,
   getModelAllowlistCandidates,
   getUsageSummary,
   getCapacitySummary,
   getLiveCapability,
 } = vi.hoisted(() => ({
+  updateGroup: vi.fn(),
   listGroups: vi.fn(),
   getModelAllowlistCandidates: vi.fn(),
   getUsageSummary: vi.fn(),
@@ -30,7 +32,7 @@ vi.mock("@/api/admin", () => ({
       getCapacitySummary,
       getLiveCapability,
       create: vi.fn(),
-      update: vi.fn(),
+      update: updateGroup,
       delete: vi.fn(),
       duplicate: vi.fn(),
       updateSortOrder: vi.fn(),
@@ -68,6 +70,8 @@ const sourceGroup = {
   id: 42,
   name: "OpenAI",
   description: null,
+  system_prompt_enabled: true,
+  system_prompt: "Group instruction",
   platform: "openai",
   rate_multiplier: 1,
   rpm_limit: 0,
@@ -220,7 +224,12 @@ const mountView = () =>
         GroupCapacityBadge: true,
         GroupRateMultipliersModal: true,
         GroupRPMOverridesModal: true,
-        ReasoningEffortPolicyFields: true,
+        ReasoningEffortPolicyFields: defineComponent({
+          setup(_props, { expose }) {
+            expose({ validate: () => true, resetValidation: () => undefined });
+            return () => h("div");
+          },
+        }),
         CodexManifestAccountsField: CodexManifestAccountsFieldStub,
         PricingEntryCard: true,
         VueDraggable: true,
@@ -231,6 +240,8 @@ const mountView = () =>
 describe("GroupsView Codex manifest binding", () => {
   beforeEach(() => {
     localStorage.clear();
+    updateGroup.mockReset();
+    updateGroup.mockResolvedValue(sourceGroup);
     listGroups.mockReset();
     getModelAllowlistCandidates.mockReset();
     getUsageSummary.mockReset();
@@ -248,6 +259,27 @@ describe("GroupsView Codex manifest binding", () => {
     getUsageSummary.mockResolvedValue([]);
     getCapacitySummary.mockResolvedValue([]);
     getLiveCapability.mockResolvedValue({ supported: false });
+  });
+
+
+  it("loads, previews and saves the group system prompt without changing manifest configuration", async () => {
+    const wrapper = mountView();
+    await flushPromises();
+    const editButton = wrapper.findAll("button").find((button) => button.text().includes("common.edit"));
+    await editButton!.trigger("click");
+    await flushPromises();
+    const prompt = wrapper.get<HTMLTextAreaElement>('[data-test="edit-group-system-prompt"]');
+    expect(prompt.element.value).toBe("Group instruction");
+    await prompt.setValue("Use concise answers.\nPreserve code formatting.");
+    expect(wrapper.get("details pre").text()).toBe("Use concise answers.\nPreserve code formatting.");
+    await wrapper.get("#edit-group-form").trigger("submit");
+    await flushPromises();
+    expect(updateGroup).toHaveBeenCalledWith(sourceGroup.id, expect.objectContaining({
+      system_prompt_enabled: true,
+      system_prompt: "Use concise answers.\nPreserve code formatting.",
+      codex_models_manifest_config: sourceGroup.codex_models_manifest_config,
+    }));
+    wrapper.unmount();
   });
 
   it("preserves consecutive child updates on the reactive edit config", async () => {

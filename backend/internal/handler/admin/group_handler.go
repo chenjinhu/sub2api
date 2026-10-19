@@ -185,6 +185,8 @@ func sanitizeUpdateGroupRequestForSimpleMode(req *UpdateGroupRequest) {
 
 // CreateGroupRequest represents create group request
 type CreateGroupRequest struct {
+	SystemPromptEnabled       bool                          `json:"system_prompt_enabled"`
+	SystemPrompt              string                        `json:"system_prompt" binding:"omitempty,max=16384"`
 	Name                      string                        `json:"name" binding:"required"`
 	Description               string                        `json:"description"`
 	I18n                      service.GroupI18n             `json:"i18n"` // 名称与描述的界面语言译文
@@ -260,6 +262,8 @@ type CreateGroupRequest struct {
 
 // UpdateGroupRequest represents update group request
 type UpdateGroupRequest struct {
+	SystemPromptEnabled       *bool                          `json:"system_prompt_enabled"`
+	SystemPrompt              *string                        `json:"system_prompt" binding:"omitempty,max=16384"`
 	Name                      string                         `json:"name"`
 	Description               *string                        `json:"description"`
 	I18n                      *service.GroupI18n             `json:"i18n"` // 缺省不修改，传入则整体替换
@@ -670,6 +674,8 @@ func (h *GroupHandler) Create(c *gin.Context) {
 		Name:                            req.Name,
 		Description:                     req.Description,
 		I18n:                            req.I18n,
+		SystemPromptEnabled:             req.SystemPromptEnabled,
+		SystemPrompt:                    req.SystemPrompt,
 		Platform:                        req.Platform,
 		RateMultiplier:                  req.RateMultiplier,
 		IsExclusive:                     req.IsExclusive,
@@ -816,6 +822,8 @@ func (h *GroupHandler) Update(c *gin.Context) {
 		Name:                            req.Name,
 		Description:                     req.Description,
 		I18n:                            req.I18n,
+		SystemPromptEnabled:             req.SystemPromptEnabled,
+		SystemPrompt:                    req.SystemPrompt,
 		Platform:                        req.Platform,
 		RateMultiplier:                  req.RateMultiplier,
 		IsExclusive:                     req.IsExclusive,

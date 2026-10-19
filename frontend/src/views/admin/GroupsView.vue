@@ -509,6 +509,21 @@
             :placeholder="t('admin.groups.optionalDescription')"
           />
         </div>
+        <div v-if="!authStore.isSimpleMode" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="input-label mb-0">{{ t("admin.groups.systemPrompt.title") }}</label>
+            <Toggle v-model="createForm.system_prompt_enabled" />
+          </div>
+          <textarea v-model="createForm.system_prompt" rows="6" maxlength="16384" class="input font-mono"
+            :required="createForm.system_prompt_enabled"
+            :placeholder="t('admin.groups.systemPrompt.placeholder')"
+            data-test="create-group-system-prompt"></textarea>
+          <p class="input-hint">{{ t("admin.groups.systemPrompt.hint") }}</p>
+          <details v-if="createForm.system_prompt.trim()" class="rounded border border-gray-200 p-3 dark:border-gray-700">
+            <summary class="cursor-pointer text-sm">{{ t("admin.groups.systemPrompt.preview") }}</summary>
+            <pre class="mt-2 whitespace-pre-wrap break-words text-sm">{{ createForm.system_prompt }}</pre>
+          </details>
+        </div>
         <div>
           <label class="input-label">{{
             t("admin.groups.form.platform")
@@ -2145,6 +2160,21 @@
             multiline
             rows="3"
           />
+        </div>
+        <div v-if="!authStore.isSimpleMode" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="input-label mb-0">{{ t("admin.groups.systemPrompt.title") }}</label>
+            <Toggle v-model="editForm.system_prompt_enabled" />
+          </div>
+          <textarea v-model="editForm.system_prompt" rows="6" maxlength="16384" class="input font-mono"
+            :required="editForm.system_prompt_enabled"
+            :placeholder="t('admin.groups.systemPrompt.placeholder')"
+            data-test="edit-group-system-prompt"></textarea>
+          <p class="input-hint">{{ t("admin.groups.systemPrompt.hint") }}</p>
+          <details v-if="editForm.system_prompt.trim()" class="rounded border border-gray-200 p-3 dark:border-gray-700">
+            <summary class="cursor-pointer text-sm">{{ t("admin.groups.systemPrompt.preview") }}</summary>
+            <pre class="mt-2 whitespace-pre-wrap break-words text-sm">{{ editForm.system_prompt }}</pre>
+          </details>
         </div>
         <div>
           <label class="input-label">{{
@@ -4944,6 +4974,8 @@ const createForm = reactive({
   name: "",
   description: "",
   i18n: {} as GroupI18n,
+  system_prompt_enabled: false,
+  system_prompt: "",
   platform: "anthropic" as GroupPlatform,
   rate_multiplier: 1.0,
   is_exclusive: false,
@@ -5309,6 +5341,8 @@ const editForm = reactive({
   name: "",
   description: "",
   i18n: {} as GroupI18n,
+  system_prompt_enabled: false,
+  system_prompt: "",
   platform: "anthropic" as GroupPlatform,
   rate_multiplier: 1.0,
   is_exclusive: false,
@@ -5773,6 +5807,8 @@ const closeCreateModal = () => {
   createForm.name = "";
   createForm.description = "";
   createForm.i18n = {};
+  createForm.system_prompt_enabled = false;
+  createForm.system_prompt = "";
   createForm.platform = "anthropic";
   createForm.rate_multiplier = 1.0;
   createForm.is_exclusive = false;
@@ -6061,6 +6097,8 @@ const handleEdit = async (group: AdminGroup) => {
       { ...text },
     ]),
   );
+  editForm.system_prompt_enabled = group.system_prompt_enabled ?? false;
+  editForm.system_prompt = group.system_prompt ?? "";
   editForm.platform = group.platform;
   editForm.rate_multiplier = group.rate_multiplier;
   editForm.is_exclusive = group.is_exclusive;
