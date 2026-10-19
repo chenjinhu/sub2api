@@ -627,6 +627,8 @@ export interface Group {
 }
 
 export interface AdminGroup extends Group {
+  system_prompt_enabled?: boolean
+  system_prompt?: string
   force_openai_fast: boolean
   free_openai_fast: boolean
   model_pricing: import('@/api/admin/channels').ChannelModelPricing[]
@@ -791,6 +793,8 @@ export interface UpdateApiKeyRequest {
 }
 
 export interface CreateGroupRequest {
+  system_prompt_enabled?: boolean
+  system_prompt?: string
   name: string
   description?: string | null
   platform?: GroupPlatform
@@ -856,6 +860,8 @@ export interface CreateGroupRequest {
 }
 
 export interface UpdateGroupRequest {
+  system_prompt_enabled?: boolean
+  system_prompt?: string
   name?: string
   description?: string | null
   platform?: GroupPlatform

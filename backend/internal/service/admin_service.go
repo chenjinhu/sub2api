@@ -233,6 +233,8 @@ type AdminBoundAuthIdentityChannel struct {
 }
 
 type CreateGroupInput struct {
+	SystemPromptEnabled       bool
+	SystemPrompt              string
 	Name                      string
 	Description               string
 	Platform                  string
@@ -313,6 +315,8 @@ type CreateGroupInput struct {
 }
 
 type UpdateGroupInput struct {
+	SystemPromptEnabled       *bool
+	SystemPrompt              *string
 	Name                      string
 	Description               *string
 	Platform                  string

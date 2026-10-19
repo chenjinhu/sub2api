@@ -24,6 +24,10 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldSystemPromptEnabled holds the string denoting the system_prompt_enabled field in the database.
+	FieldSystemPromptEnabled = "system_prompt_enabled"
+	// FieldSystemPrompt holds the string denoting the system_prompt field in the database.
+	FieldSystemPrompt = "system_prompt"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// FieldRateMultiplier holds the string denoting the rate_multiplier field in the database.
@@ -227,6 +231,8 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 	FieldName,
+	FieldSystemPromptEnabled,
+	FieldSystemPrompt,
 	FieldDescription,
 	FieldRateMultiplier,
 	FieldPeakRateEnabled,
@@ -326,6 +332,10 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultSystemPromptEnabled holds the default value on creation for the "system_prompt_enabled" field.
+	DefaultSystemPromptEnabled bool
+	// DefaultSystemPrompt holds the default value on creation for the "system_prompt" field.
+	DefaultSystemPrompt string
 	// DefaultRateMultiplier holds the default value on creation for the "rate_multiplier" field.
 	DefaultRateMultiplier float64
 	// DefaultPeakRateEnabled holds the default value on creation for the "peak_rate_enabled" field.
@@ -462,6 +472,16 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// BySystemPromptEnabled orders the results by the system_prompt_enabled field.
+func BySystemPromptEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSystemPromptEnabled, opts...).ToFunc()
+}
+
+// BySystemPrompt orders the results by the system_prompt field.
+func BySystemPrompt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSystemPrompt, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

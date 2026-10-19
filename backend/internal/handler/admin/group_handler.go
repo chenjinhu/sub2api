@@ -182,6 +182,8 @@ func sanitizeUpdateGroupRequestForSimpleMode(req *UpdateGroupRequest) {
 
 // CreateGroupRequest represents create group request
 type CreateGroupRequest struct {
+	SystemPromptEnabled       bool                          `json:"system_prompt_enabled"`
+	SystemPrompt              string                        `json:"system_prompt" binding:"omitempty,max=16384"`
 	Name                      string                        `json:"name" binding:"required"`
 	Description               string                        `json:"description"`
 	Platform                  string                        `json:"platform" binding:"omitempty,group_platform"`
@@ -256,6 +258,8 @@ type CreateGroupRequest struct {
 
 // UpdateGroupRequest represents update group request
 type UpdateGroupRequest struct {
+	SystemPromptEnabled       *bool                          `json:"system_prompt_enabled"`
+	SystemPrompt              *string                        `json:"system_prompt" binding:"omitempty,max=16384"`
 	Name                      string                         `json:"name"`
 	Description               *string                        `json:"description"`
 	Platform                  string                         `json:"platform" binding:"omitempty,group_platform"`
@@ -664,6 +668,8 @@ func (h *GroupHandler) Create(c *gin.Context) {
 	group, err := h.adminService.CreateGroup(c.Request.Context(), &service.CreateGroupInput{
 		Name:                            req.Name,
 		Description:                     req.Description,
+		SystemPromptEnabled:             req.SystemPromptEnabled,
+		SystemPrompt:                    req.SystemPrompt,
 		Platform:                        req.Platform,
 		RateMultiplier:                  req.RateMultiplier,
 		IsExclusive:                     req.IsExclusive,
@@ -809,6 +815,8 @@ func (h *GroupHandler) Update(c *gin.Context) {
 	group, err := h.adminService.UpdateGroup(c.Request.Context(), groupID, &service.UpdateGroupInput{
 		Name:                            req.Name,
 		Description:                     req.Description,
+		SystemPromptEnabled:             req.SystemPromptEnabled,
+		SystemPrompt:                    req.SystemPrompt,
 		Platform:                        req.Platform,
 		RateMultiplier:                  req.RateMultiplier,
 		IsExclusive:                     req.IsExclusive,

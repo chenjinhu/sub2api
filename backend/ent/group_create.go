@@ -78,6 +78,34 @@ func (_c *GroupCreate) SetName(v string) *GroupCreate {
 	return _c
 }
 
+// SetSystemPromptEnabled sets the "system_prompt_enabled" field.
+func (_c *GroupCreate) SetSystemPromptEnabled(v bool) *GroupCreate {
+	_c.mutation.SetSystemPromptEnabled(v)
+	return _c
+}
+
+// SetNillableSystemPromptEnabled sets the "system_prompt_enabled" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableSystemPromptEnabled(v *bool) *GroupCreate {
+	if v != nil {
+		_c.SetSystemPromptEnabled(*v)
+	}
+	return _c
+}
+
+// SetSystemPrompt sets the "system_prompt" field.
+func (_c *GroupCreate) SetSystemPrompt(v string) *GroupCreate {
+	_c.mutation.SetSystemPrompt(v)
+	return _c
+}
+
+// SetNillableSystemPrompt sets the "system_prompt" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableSystemPrompt(v *string) *GroupCreate {
+	if v != nil {
+		_c.SetSystemPrompt(*v)
+	}
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *GroupCreate) SetDescription(v string) *GroupCreate {
 	_c.mutation.SetDescription(v)
@@ -1047,6 +1075,14 @@ func (_c *GroupCreate) defaults() error {
 		v := group.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.SystemPromptEnabled(); !ok {
+		v := group.DefaultSystemPromptEnabled
+		_c.mutation.SetSystemPromptEnabled(v)
+	}
+	if _, ok := _c.mutation.SystemPrompt(); !ok {
+		v := group.DefaultSystemPrompt
+		_c.mutation.SetSystemPrompt(v)
+	}
 	if _, ok := _c.mutation.RateMultiplier(); !ok {
 		v := group.DefaultRateMultiplier
 		_c.mutation.SetRateMultiplier(v)
@@ -1229,6 +1265,12 @@ func (_c *GroupCreate) check() error {
 		if err := group.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.SystemPromptEnabled(); !ok {
+		return &ValidationError{Name: "system_prompt_enabled", err: errors.New(`ent: missing required field "Group.system_prompt_enabled"`)}
+	}
+	if _, ok := _c.mutation.SystemPrompt(); !ok {
+		return &ValidationError{Name: "system_prompt", err: errors.New(`ent: missing required field "Group.system_prompt"`)}
 	}
 	if _, ok := _c.mutation.RateMultiplier(); !ok {
 		return &ValidationError{Name: "rate_multiplier", err: errors.New(`ent: missing required field "Group.rate_multiplier"`)}
@@ -1460,6 +1502,14 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(group.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.SystemPromptEnabled(); ok {
+		_spec.SetField(group.FieldSystemPromptEnabled, field.TypeBool, value)
+		_node.SystemPromptEnabled = value
+	}
+	if value, ok := _c.mutation.SystemPrompt(); ok {
+		_spec.SetField(group.FieldSystemPrompt, field.TypeString, value)
+		_node.SystemPrompt = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(group.FieldDescription, field.TypeString, value)
@@ -1904,6 +1954,30 @@ func (u *GroupUpsert) SetName(v string) *GroupUpsert {
 // UpdateName sets the "name" field to the value that was provided on create.
 func (u *GroupUpsert) UpdateName() *GroupUpsert {
 	u.SetExcluded(group.FieldName)
+	return u
+}
+
+// SetSystemPromptEnabled sets the "system_prompt_enabled" field.
+func (u *GroupUpsert) SetSystemPromptEnabled(v bool) *GroupUpsert {
+	u.Set(group.FieldSystemPromptEnabled, v)
+	return u
+}
+
+// UpdateSystemPromptEnabled sets the "system_prompt_enabled" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateSystemPromptEnabled() *GroupUpsert {
+	u.SetExcluded(group.FieldSystemPromptEnabled)
+	return u
+}
+
+// SetSystemPrompt sets the "system_prompt" field.
+func (u *GroupUpsert) SetSystemPrompt(v string) *GroupUpsert {
+	u.Set(group.FieldSystemPrompt, v)
+	return u
+}
+
+// UpdateSystemPrompt sets the "system_prompt" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateSystemPrompt() *GroupUpsert {
+	u.SetExcluded(group.FieldSystemPrompt)
 	return u
 }
 
@@ -3015,6 +3089,34 @@ func (u *GroupUpsertOne) SetName(v string) *GroupUpsertOne {
 func (u *GroupUpsertOne) UpdateName() *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetSystemPromptEnabled sets the "system_prompt_enabled" field.
+func (u *GroupUpsertOne) SetSystemPromptEnabled(v bool) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSystemPromptEnabled(v)
+	})
+}
+
+// UpdateSystemPromptEnabled sets the "system_prompt_enabled" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateSystemPromptEnabled() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSystemPromptEnabled()
+	})
+}
+
+// SetSystemPrompt sets the "system_prompt" field.
+func (u *GroupUpsertOne) SetSystemPrompt(v string) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSystemPrompt(v)
+	})
+}
+
+// UpdateSystemPrompt sets the "system_prompt" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateSystemPrompt() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSystemPrompt()
 	})
 }
 
@@ -4461,6 +4563,34 @@ func (u *GroupUpsertBulk) SetName(v string) *GroupUpsertBulk {
 func (u *GroupUpsertBulk) UpdateName() *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetSystemPromptEnabled sets the "system_prompt_enabled" field.
+func (u *GroupUpsertBulk) SetSystemPromptEnabled(v bool) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSystemPromptEnabled(v)
+	})
+}
+
+// UpdateSystemPromptEnabled sets the "system_prompt_enabled" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateSystemPromptEnabled() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSystemPromptEnabled()
+	})
+}
+
+// SetSystemPrompt sets the "system_prompt" field.
+func (u *GroupUpsertBulk) SetSystemPrompt(v string) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSystemPrompt(v)
+	})
+}
+
+// UpdateSystemPrompt sets the "system_prompt" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateSystemPrompt() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSystemPrompt()
 	})
 }
 

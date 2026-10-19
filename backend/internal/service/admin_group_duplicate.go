@@ -97,6 +97,8 @@ func cloneGroupForDuplicate(source *Group, operationID string) *Group {
 	return &Group{
 		Name:                            duplicateGroupName(source.Name, 1),
 		Description:                     source.Description,
+		SystemPromptEnabled:             source.SystemPromptEnabled,
+		SystemPrompt:                    source.SystemPrompt,
 		Platform:                        source.Platform,
 		RateMultiplier:                  source.RateMultiplier,
 		PeakRateEnabled:                 source.PeakRateEnabled,

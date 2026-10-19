@@ -1008,6 +1008,12 @@ export default {
         disabled: '未启用'
       },
       enterGroupName: '请输入分组名称',
+      systemPrompt: {
+        title: '分组专属提示词',
+        placeholder: '例如：使用中文回答，先给结论，再给代码和验证步骤。',
+        hint: '启用后追加到分组文本请求的系统指令，保留客户端已有内容。支持 Responses（含 WebSocket）、Chat Completions、Messages 和 Gemini 文本接口。最多 16384 字符。',
+        preview: '预览提示词',
+      },
       optionalDescription: '可选描述',
       platformHint: '选择此分组关联的平台',
       platformNotEditable: '创建后不可更改平台',
