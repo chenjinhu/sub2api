@@ -483,3 +483,74 @@ func TestCodexOutboundVersionHasSingleSource(t *testing.T) {
 		"codexCLIVersion=%q 不得低于上游最低门槛 %q", codexCLIVersion, codexUpstreamMinVersion,
 	)
 }
+
+func TestOpenAIStreamMetadataBeforeOverloadKeepsRetryAvailable(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	for _, passthrough := range []bool{false, true} {
+		name := "native"
+		if passthrough {
+			name = "passthrough"
+		}
+		t.Run(name, func(t *testing.T) {
+			svc := &OpenAIGatewayService{cfg: &config.Config{Gateway: config.GatewayConfig{
+				MaxLineSize: defaultMaxLineSize,
+			}}}
+			rec := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(rec)
+			c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
+			resp := &http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{},
+				Body: io.NopCloser(strings.NewReader(strings.Join([]string{
+					`data: {"type":"response.created","response":{"id":"resp_heartbeat"}}`,
+					"",
+					`data: {"type":"response.in_progress","response":{"id":"resp_heartbeat"}}`,
+					"",
+					`data: {"type":"response.metadata","response_id":"resp_heartbeat","metadata":{}}`,
+					"",
+					`data: {"type":"response.failed","response":{"id":"resp_heartbeat","status":"failed","error":{"code":"server_is_overloaded","message":"Our servers are currently overloaded. Please try again later."}}}`,
+					"",
+					"",
+				}, "\n"))),
+			}
+			account := &Account{ID: 1, Platform: PlatformOpenAI, Type: AccountTypeOAuth}
+			var err error
+			if passthrough {
+				var result *openaiStreamingResultPassthrough
+				result, err = svc.handleStreamingResponsePassthrough(c.Request.Context(), resp, c, account, time.Now(), "model", "model")
+				require.NotNil(t, result)
+				require.Nil(t, result.firstTokenMs)
+			} else {
+				var result *openaiStreamingResult
+				result, err = svc.handleStreamingResponse(c.Request.Context(), resp, c, account, time.Now(), "model", "model")
+				require.NotNil(t, result)
+				require.Nil(t, result.firstTokenMs)
+			}
+			var failoverErr *UpstreamFailoverError
+			require.ErrorAs(t, err, &failoverErr)
+			require.True(t, failoverErr.RetryableOnSameAccount)
+			require.True(t, failoverErr.RequestScopedTransient)
+			require.Empty(t, rec.Body.String())
+		})
+	}
+}
+
+func TestOpenAICapacityRetryAfterAndBudget(t *testing.T) {
+	body := []byte(`{"error":{"code":"server_is_overloaded","message":"Our servers are currently overloaded. Please try again later."}}`)
+	for _, tc := range []struct {
+		after string
+		delay time.Duration
+		retry bool
+	}{
+		{"", 0, true}, {"2", 2 * time.Second, true}, {"90", 90 * time.Second, false},
+	} {
+		t.Run(tc.after, func(t *testing.T) {
+			err := newOpenAIUpstreamFailoverError(http.StatusServiceUnavailable, http.Header{"Retry-After": []string{tc.after}}, body, "overloaded", false)
+			require.Equal(t, tc.delay, err.SameAccountRetryDelay)
+			require.Equal(t, tc.retry, err.RetryableOnSameAccount)
+			require.Equal(t, tc.retry, err.ShouldRetryNextAccount())
+			require.Equal(t, 2, err.SameAccountRetryMax)
+			require.Equal(t, tc.after, err.ResponseHeaders.Get("Retry-After"))
+		})
+	}
+}

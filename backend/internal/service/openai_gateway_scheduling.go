@@ -1058,6 +1058,10 @@ func (s *OpenAIGatewayService) selectBestAccount(ctx context.Context, groupID *i
 			filterStats.exclude(reason)
 			continue
 		}
+		if s.openAIAccountRPMExceeded(ctx, fresh, false) {
+			filterStats.exclude("rpm_exceeded")
+			continue
+		}
 		compactTier := 0
 		if requireCompact {
 			compactTier = openAICompactSupportTier(fresh)

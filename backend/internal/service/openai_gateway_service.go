@@ -455,6 +455,7 @@ type OpenAIGatewayService struct {
 	billingService        *BillingService
 	rateLimitService      *RateLimitService
 	billingCacheService   *BillingCacheService
+	rpmCache              RPMCache // RPM 计数缓存（OpenAI OAuth/SetupToken 账号级软限流）
 	userGroupRateResolver *userGroupRateResolver
 	httpUpstream          HTTPUpstream
 	pluginManager         *PluginManager
@@ -586,6 +587,14 @@ func NewOpenAIGatewayService(
 	}
 	svc.logOpenAIWSModeBootstrap()
 	return svc
+}
+
+// SetRPMCache injects the account RPM cache during service initialization.
+func (s *OpenAIGatewayService) SetRPMCache(cache RPMCache) {
+	if s == nil {
+		return
+	}
+	s.rpmCache = cache
 }
 
 // ResolveChannelMapping 解析渠道级模型映射（代理到 ChannelService）

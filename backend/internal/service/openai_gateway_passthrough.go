@@ -1087,7 +1087,7 @@ func openAIStreamClientOutputStarted(c *gin.Context, localStarted bool) bool {
 // Lifecycle metadata and transport heartbeats are not model output.
 func openAIStreamEventIsMetadata(eventType string) bool {
 	switch strings.TrimSpace(eventType) {
-	case "response.created", "response.in_progress", "keepalive":
+	case "response.created", "response.in_progress", "response.metadata", "keepalive":
 		return true
 	default:
 		return false

@@ -361,10 +361,13 @@ func TestOpenAIHTTP429StillUsesQuotaResetHeaders(t *testing.T) {
 	require.Greater(t, time.Until(blockedUntil), 6*24*time.Hour, "real HTTP 429 must retain the upstream quota reset")
 }
 
-func TestOpenAI429RetryDelayHonorsBoundedRetryAfter(t *testing.T) {
-	deadline := time.Now().Add(openAIOAuth429RetryWindow)
-	require.Equal(t, openAIOAuth429RetryDelay, openAIOAuth429SameAccountRetryDelay(nil, deadline))
-	require.Equal(t, openAIOAuth429MaxRetryDelay, openAIOAuth429SameAccountRetryDelay(http.Header{"Retry-After": []string{"90"}}, deadline))
+func TestOpenAI429RetryDelayDoesNotShortenRetryAfter(t *testing.T) {
+	require.Equal(t, openAIOAuth429RetryDelay, openAIOAuth429SameAccountRetryDelay(nil))
+	require.Equal(t, 90*time.Second, openAIOAuth429SameAccountRetryDelay(http.Header{"Retry-After": []string{"90"}}))
+	future := time.Now().Add(90 * time.Second).UTC().Truncate(time.Second)
+	delay := openAIOAuth429SameAccountRetryDelay(http.Header{"Retry-After": []string{future.Format(http.TimeFormat)}})
+	require.Greater(t, delay, 88*time.Second)
+	require.LessOrEqual(t, delay, 90*time.Second)
 }
 
 func TestOpenAI429FastPath_OpenCodeGoUsageLimitUsesMessageResetDuration(t *testing.T) {

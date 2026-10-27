@@ -14,7 +14,6 @@ const (
 	openAIOAuth429FallbackCooldown        = 5 * time.Second
 	openAIOAuth429RetryWindow             = 2 * time.Minute
 	openAIOAuth429RetryDelay              = 500 * time.Millisecond
-	openAIOAuth429MaxRetryDelay           = 8 * time.Second
 	openAIOAuth429MaxAccountAttempts      = 3
 	openAIStopSchedulingBridgeCooldown    = 2 * time.Minute
 	openAIOAuth429StormWindow             = 10 * time.Second
@@ -308,18 +307,14 @@ func (s *OpenAIGatewayService) openAIOAuth429RetryDeadline(account *Account) tim
 	return startedAt.Add(openAIOAuth429RetryWindow)
 }
 
-func openAIOAuth429SameAccountRetryDelay(headers http.Header, deadline time.Time) time.Duration {
+func openAIOAuth429SameAccountRetryDelay(headers http.Header) time.Duration {
 	delay := openAIOAuth429RetryDelay
 	now := time.Now()
 	if resetAt := parseRetryAfterResetTime(headers, now); resetAt != nil && resetAt.After(now) {
 		delay = resetAt.Sub(now)
 	}
-	if delay > openAIOAuth429MaxRetryDelay {
-		delay = openAIOAuth429MaxRetryDelay
-	}
-	if remaining := time.Until(deadline); !deadline.IsZero() && delay > remaining {
-		delay = remaining
-	}
+	// Retry-After is a minimum. The caller must decline a retry that cannot
+	// fit its deadline instead of shortening the provider's requested wait.
 	if delay < 0 {
 		return 0
 	}

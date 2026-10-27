@@ -47,7 +47,9 @@ func TestSameAccountRetryDelayFor(t *testing.T) {
 		{name: "capped retry", retryCount: 10, want: 8 * time.Second},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, tc.want, sameAccountRetryDelayFor(capacityErr, tc.retryCount))
+			delay := sameAccountRetryDelayFor(capacityErr, tc.retryCount)
+			require.GreaterOrEqual(t, delay, tc.want)
+			require.LessOrEqual(t, delay, min(tc.want+tc.want/4, maxRequestScopedRetryDelay))
 		})
 	}
 
@@ -1039,4 +1041,12 @@ func TestFailoverClientGone(t *testing.T) {
 	t.Run("nil安全", func(t *testing.T) {
 		require.False(t, failoverClientGone(nil))
 	})
+}
+
+func TestSameAccountRetryRefusesWaitBeyondDeadline(t *testing.T) {
+	err := &service.UpstreamFailoverError{RetryableOnSameAccount: true, SameAccountRetryDeadline: time.Now().Add(10 * time.Second), SameAccountRetryDelay: 90 * time.Second}
+	require.False(t, sameAccountRetryAllowed(err, 0, 3))
+	require.Equal(t, 90*time.Second, sameAccountRetryDelayFor(err, 1))
+	err.SameAccountRetryDelay = time.Second
+	require.True(t, sameAccountRetryAllowed(err, 0, 3))
 }

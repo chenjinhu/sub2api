@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
@@ -359,6 +360,17 @@ func newOpenAIUpstreamFailoverError(
 		// retries are exhausted, but expose it as a retryable server_error.
 		failoverErr.ClientStatusCode = http.StatusServiceUnavailable
 		failoverErr.ClientMessage = openAICapacityShedClientMessage(upstreamMsg, responseBody)
+		failoverErr.SameAccountRetryMax = 2
+		now := time.Now()
+		if retryAt := parseRetryAfterResetTime(responseHeaders, now); retryAt != nil && retryAt.After(now) {
+			failoverErr.SameAccountRetryDelay = retryAt.Sub(now)
+			if failoverErr.SameAccountRetryDelay > 8*time.Second {
+				// A long provider cooldown must not become a rapid retry against
+				// either this account or the next account in the same pool.
+				failoverErr.RetryableOnSameAccount = false
+				failoverErr.NextAccountAction = NextAccountStop
+			}
+		}
 	}
 	return failoverErr
 }
@@ -395,7 +407,8 @@ func (s *OpenAIGatewayService) newOpenAIAccountFailoverErrorWithClassificationHe
 	)
 	if oauth429Retry {
 		failoverErr.SameAccountRetryDeadline = s.openAIOAuth429RetryDeadline(account)
-		failoverErr.SameAccountRetryDelay = openAIOAuth429SameAccountRetryDelay(responseHeaders, failoverErr.SameAccountRetryDeadline)
+		failoverErr.SameAccountRetryDelay = openAIOAuth429SameAccountRetryDelay(responseHeaders)
+		failoverErr.SameAccountRetryMax = 3
 	}
 	return failoverErr
 }

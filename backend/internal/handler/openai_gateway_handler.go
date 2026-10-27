@@ -3086,7 +3086,14 @@ func (h *OpenAIGatewayHandler) ResponsesWebSocket(c *gin.Context) {
 				}
 				currentUserRelease = wrapReleaseOnDone(ctx, userReleaseFunc)
 				currentAccountRelease = wrapReleaseOnDone(ctx, accountReleaseFunc)
-				return checkSimpleModeTurnBilling()
+				if err := checkSimpleModeTurnBilling(); err != nil {
+					return err
+				}
+				if !h.gatewayService.AdmitOpenAIAccountRPM(turnCtx, account, true) {
+					releaseTurnSlots()
+					return service.NewOpenAIWSClientCloseError(coderws.StatusTryAgainLater, "account request rate limit reached, please retry later", nil)
+				}
+				return nil
 			},
 			AfterTurn: func(turn int, result *service.OpenAIForwardResult, turnErr error) {
 				turnStart := getTurnStart(turn)

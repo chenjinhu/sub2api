@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"math/rand/v2"
 	"net/http"
 	"time"
 
@@ -62,7 +63,7 @@ func sameAccountRetryDelayFor(failoverErr *service.UpstreamFailoverError, retryC
 	if failoverErr.SameAccountRetryDelay > 0 {
 		return failoverErr.SameAccountRetryDelay
 	}
-	if !failoverErr.RequestScopedTransient || retryCount <= 1 {
+	if !failoverErr.RequestScopedTransient {
 		return sameAccountRetryDelay
 	}
 
@@ -73,7 +74,10 @@ func sameAccountRetryDelayFor(failoverErr *service.UpstreamFailoverError, retryC
 		}
 		delay *= 2
 	}
-	return delay
+	// Spread independent clients' capacity retries instead of aligning every
+	// request on the same 500 ms / 1 s / 2 s boundaries.
+	delay += time.Duration(rand.Float64() * float64(delay) * 0.25)
+	return min(delay, maxRequestScopedRetryDelay)
 }
 
 func sameAccountRetryAllowed(failoverErr *service.UpstreamFailoverError, retryCount, retryLimit int) bool {
@@ -81,6 +85,11 @@ func sameAccountRetryAllowed(failoverErr *service.UpstreamFailoverError, retryCo
 		return false
 	}
 	if !sameAccountRetryDeadlineAllows(failoverErr) {
+		return false
+	}
+	if !failoverErr.SameAccountRetryDeadline.IsZero() &&
+		failoverErr.SameAccountRetryDelay > 0 &&
+		!time.Now().Add(failoverErr.SameAccountRetryDelay).Before(failoverErr.SameAccountRetryDeadline) {
 		return false
 	}
 	// Error-specific caps (Grok capacity/stream-idle) remain hard limits even

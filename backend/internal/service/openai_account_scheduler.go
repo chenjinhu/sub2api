@@ -1476,6 +1476,10 @@ func (s *defaultOpenAIAccountScheduler) selectByLoadBalance(
 			filterStats.exclude("transport_incompatible")
 			continue
 		}
+		if s.service.openAIAccountRPMExceeded(ctx, account, account.ID == req.StickyAccountID || account.ID == req.StickyPreviousAccountID) {
+			filterStats.exclude("rpm_exceeded")
+			continue
+		}
 		filtered = append(filtered, account)
 		loadReq = append(loadReq, AccountWithConcurrency{
 			ID:             account.ID,
@@ -2153,14 +2157,54 @@ func (s *OpenAIGatewayService) SelectAccountWithSchedulerForImages(
 	return selection, decision, err
 }
 
-// selectAccountWithScheduler wraps selectAccountWithSchedulerOnce with a
+// selectAccountWithScheduler applies RPM admission to every scheduler path,
+// including sticky selections and the proxy-quarantine fallback.
+func (s *OpenAIGatewayService) selectAccountWithScheduler(
+	ctx context.Context,
+	groupID *int64,
+	previousResponseID string,
+	sessionHash string,
+	requestedModel string,
+	excludedIDs map[int64]struct{},
+	requiredTransport OpenAIUpstreamTransport,
+	requiredCapability OpenAIEndpointCapability,
+	requiredImageCapability OpenAIImagesCapability,
+	requireCompact bool,
+	platform string,
+	previousResponseCanMove bool,
+	useUpstreamTokenCost bool,
+) (*AccountSelectionResult, OpenAIAccountScheduleDecision, error) {
+	excludedIDs = cloneExcludedAccountIDs(excludedIDs)
+	for {
+		selection, decision, err := s.selectAccountWithProxyFallback(ctx, groupID, previousResponseID, sessionHash, requestedModel, excludedIDs, requiredTransport, requiredCapability, requiredImageCapability, requireCompact, platform, previousResponseCanMove, useUpstreamTokenCost)
+		if err != nil || selection == nil || selection.Account == nil {
+			return selection, decision, err
+		}
+		if s.AdmitOpenAIAccountRPM(ctx, selection.Account, decision.StickySessionHit || decision.StickyPreviousHit) {
+			return selection, decision, nil
+		}
+		if selection.ReleaseFunc != nil {
+			selection.ReleaseFunc()
+		}
+		id := selection.Account.ID
+		if _, alreadyExcluded := excludedIDs[id]; alreadyExcluded {
+			return nil, decision, ErrNoAvailableAccounts
+		}
+		if excludedIDs == nil {
+			excludedIDs = make(map[int64]struct{})
+		}
+		excludedIDs[id] = struct{}{}
+	}
+}
+
+// selectAccountWithProxyFallback wraps selectAccountWithSchedulerOnce with a
 // fail-open second pass for the proxy stream circuit (#5056): when the only
 // reason no account is available is that every candidate sits behind a
 // quarantined proxy, the quarantine must degrade to a preference instead of
 // zeroing out capacity. The retry re-runs the exact same selection with the
 // quarantine checks bypassed, so healthy proxies always win the first pass
 // and quarantined ones only serve when nothing else can.
-func (s *OpenAIGatewayService) selectAccountWithScheduler(
+func (s *OpenAIGatewayService) selectAccountWithProxyFallback(
 	ctx context.Context,
 	groupID *int64,
 	previousResponseID string,
