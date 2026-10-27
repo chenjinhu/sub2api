@@ -2,6 +2,9 @@
 /docs-local/
 .codex
 
+# 本地大压缩包（Archive.zip 约 678MB，超过 GitHub 单文件上限）
+/Archive.zip
+
 # ===================
 # Go 后端
 # ===================
